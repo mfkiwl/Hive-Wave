@@ -977,7 +977,7 @@ F 3 "~" H 1650 1450 50  0001 C CNN
 	1    0    0    1   
 $EndComp
 Wire Wire Line
-	1300 2000 2000 2000
+	1300 2000 1650 2000
 Wire Wire Line
 	2650 1600 2650 2000
 Wire Wire Line
@@ -1013,8 +1013,6 @@ Wire Wire Line
 	3550 5300 3550 5000
 Wire Wire Line
 	3150 5100 3150 5000
-Wire Wire Line
-	2700 5100 2950 5100
 $Comp
 L Connector:USB_B_Micro J1
 U 1 1 621371BD
@@ -1069,26 +1067,35 @@ Text GLabel 8400 4800 2    50   Input ~ 0
 VUSB
 Text GLabel 1650 1150 1    50   Input ~ 0
 VUSB
-Connection ~ 2950 5100
-Wire Wire Line
-	2950 5100 3150 5100
 Wire Wire Line
 	3350 4800 3350 4850
 Wire Wire Line
-	2950 4600 2950 5100
+	1650 1600 1650 2000
+Connection ~ 1650 2000
+Wire Wire Line
+	1650 2000 2000 2000
 $Comp
-L Jumper:SolderJumper_2_Open JP2
-U 1 1 621FDE34
-P 2950 4450
-F 0 "JP2" V 2904 4362 50  0000 R CNN
-F 1 "MCU_VUSB_SolderJumper" V 2995 4362 50  0000 R CNN
-F 2 "Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm" H 2950 4450 50  0001 C CNN
-F 3 "~" H 2950 4450 50  0001 C CNN
-	1    2950 4450
-	0    -1   1    0   
+L Jumper:SolderJumper_3_Open JP2
+U 1 1 6231233C
+P 2900 4650
+F 0 "JP2" H 2900 4763 50  0000 C CNN
+F 1 "VUSB_SolderJumper" H 2900 4854 50  0000 C CNN
+F 2 "Jumper:SolderJumper-3_P1.3mm_Open_Pad1.0x1.5mm_NumberLabels" H 2900 4650 50  0001 C CNN
+F 3 "~" H 2900 4650 50  0001 C CNN
+	1    2900 4650
+	1    0    0    1   
 $EndComp
-Text GLabel 2850 4300 0    50   Input ~ 0
+Wire Wire Line
+	2700 5100 3100 5100
+Wire Wire Line
+	2700 4650 2700 5200
+Wire Wire Line
+	2900 4400 2900 4500
+Text GLabel 2900 4400 1    50   Input ~ 0
 VUSB
 Wire Wire Line
-	2850 4300 2950 4300
+	3100 4650 3100 5100
+Connection ~ 3100 5100
+Wire Wire Line
+	3100 5100 3150 5100
 $EndSCHEMATC
