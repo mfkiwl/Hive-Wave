@@ -1,0 +1,18 @@
+.SY8008B :1 ;High Efficiency 1.5MHz, 0.6A/1A/1.2A Synchronous Step Down Regulator Preliminary Spec
+SOT95P285X140-5N
+*STM IC
+*NGS
+*PLB 1="EN" 2="GND" 3="LX" 4="IN" 5="FB"
+*MXP 5
+*DFN SY8008B
+~!Manufacturer_Name (Silergy)
+~!Manufacturer_Part_Number (SY8008B)
+~!Mouser Part Number (-)
+~!Mouser Price/Stock (-)
+~!Arrow Part Number (-)
+~!Arrow Price/Stock (-)
+~!Link Datasheet (http://www.sunnyqi.com/upLoad/product/month_1306/SY8008.pdf)
+~!Height (1.4mm)
+~!3D_Model (SY8008B)
+SY8008B
+1.1!U 2.1!U 3.1!U 4.1!U 5.1!U 

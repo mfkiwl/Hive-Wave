@@ -1,0 +1,9 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP SY8008B
+D High Efficiency 1.5MHz, 0.6A/1A/1.2A Synchronous Step Down Regulator Preliminary Spec
+K
+F http://www.sunnyqi.com/upLoad/product/month_1306/SY8008.pdf
+$ENDCMP
+#
+#End Doc Library

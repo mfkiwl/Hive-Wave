@@ -1,0 +1,4 @@
+(fp_lib_table
+  (lib (name SY8008B)(type Legacy)(uri ${KIPRJMOD}/LIB_SY8008B/SY8008B/KiCad/SY8008B.mod)(options "")(descr ""))
+  (lib (name MODULE_ABX00027)(type Legacy)(uri "C:/Users/Mitchell/Documents/GitHub/Hive-Wave/Hive PCB v0.1/ABX00027/ABX00027.mod")(options "")(descr ""))
+)

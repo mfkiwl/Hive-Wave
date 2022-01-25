@@ -1,0 +1,4 @@
+(sym_lib_table
+  (lib (name Arduino_Nano_33_IoT)(type Legacy)(uri ${KIPRJMOD}/ABX00027/ABX00027.lib)(options "")(descr ""))
+  (lib (name SY8008B)(type Legacy)(uri ${KIPRJMOD}/LIB_SY8008B/SY8008B/KiCad/SY8008B.lib)(options "")(descr ""))
+)
