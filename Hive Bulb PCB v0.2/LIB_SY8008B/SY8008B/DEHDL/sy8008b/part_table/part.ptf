@@ -1,0 +1,11 @@
+FILE_TYPE = MULTI_PHYS_TABLE;
+
+PART 'SY8008B'
+CLASS = IC
+{========================================================================================}
+:"MANUFACTURER_NAME", "MANUFACTURER_PART_NUMBER"= "PART_NUMBER", "JEDEC_TYPE", "PACK_TYPE", "MOUSER_PART_NUMBER", "MOUSER_PRICE/STOCK", "ARROW_PART_NUMBER", "ARROW_PRICE/STOCK", "DESCRIPTION", "DATASHEET", "HEIGHT";
+{========================================================================================}
+ "Silergy", "SY8008B" (!) = "", "SOT95P285X140-5N", "SOT23 (5-Pin)", "", "", "", "", "High Efficiency 1.5MHz, 0.6A/1A/1.2A Synchronous Step Down Regulator Preliminary Spec", "http://www.sunnyqi.com/upLoad/product/month_1306/SY8008.pdf", "1.4 mm"
+END_PART
+
+END.

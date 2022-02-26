@@ -1,0 +1,6 @@
+(sym_lib_table
+  (lib (name MCU_RaspberryPi_RP2040)(type Legacy)(uri "C:/Users/Mitchell/Google Drive/Projects/Hive (Project  Wave)/Component Documentation/RP2040/Minimal-KiCAD/Minimal/RP2040_minimal/MCU_RaspberryPi_RP2040.lib")(options "")(descr ""))
+  (lib (name Arduino_Nano_33_IoT)(type Legacy)(uri "C:/Users/Mitchell/Documents/GitHub/Hive-Wave/Hive Bulb PCB v0.2/ABX00027/ABX00027.lib")(options "")(descr ""))
+  (lib (name SY8008B)(type Legacy)(uri "C:/Users/Mitchell/Documents/GitHub/Hive-Wave/Hive Bulb PCB v0.2/LIB_SY8008B/SY8008B/KiCad/SY8008B.lib")(options "")(descr ""))
+  (lib (name LS05-13B05R3)(type Legacy)(uri "C:/Users/Mitchell/Documents/GitHub/Hive-Wave/HW Component Libraries/LS05-13B05R3/LS05-13B05R3.lib")(options "")(descr ""))
+)

@@ -1,0 +1,9 @@
+Manufacturer=Silergy
+PartNumber=SY8008B
+PartCategory=Integrated Circuit
+PackageCategory=SOT23 (5-Pin)
+PinCount=5
+Version=1.1
+Released=2018-03-20 11:33:05
+Downloaded=2022-01-17 20:43:47
+3D=Y

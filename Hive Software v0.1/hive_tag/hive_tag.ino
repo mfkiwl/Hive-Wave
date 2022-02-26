@@ -28,6 +28,7 @@
  */
 
 ///////////////////////////////////////////////////////////////////////////////
+// LIBRARIES
 
 #include <SPI.h>
 //#include <FastLED.h>
@@ -50,18 +51,19 @@ const uint8_t PIN_SS = 10; // spi select pin
 #define COLOR_ORDER GRB
 
 struct TagVars {
-    int rangeOfActivation;
+    byte tagID;
+    byte rangeOfActivation;
     byte brightness;
     byte redChannel;
     byte greenChannel;
     byte blueChannel;
-    int turnOnDelay;
-    int shutOffDelay;
-    int fadeInRate;
-    int fadeOutRate;
     byte fadeOnRangeOnly;
     byte cutOffMaxBrightness;
     byte cutOffMinBrightness;
+    short turnOnDelay;
+    short shutOffDelay;
+    short fadeInRate;
+    short fadeOutRate;
 };
 
 struct TagControl {
@@ -108,14 +110,22 @@ byte LEDBrightnessTable[256] = {
     184, 186, 189, 191, 193, 195, 197, 199, 201, 204, 206, 208, 210, 212, 215, 217,
     219, 221, 224, 226, 228, 231, 233, 235, 238, 240, 243, 245, 248, 250, 253, 255};
 
+struct TagVars lightSettings = {5, 100, 256, 256, 256, 1, 0, 100, 0, 0, 0, 0};
+struct TagControl tagCommands = {0, ENV_MASTER, BRIGHTER_WHEN_CLOSER, PREEMINENCE};
+
 ///////////////////////////////////////////////////////////////////////////////
 // DWM1000 UWB MODULE VARIABLES
 
-#define POLL 0
-#define POLL_ACK 1
-#define RANGE 2
-#define RANGE_REPORT 3
-#define RANGE_FAILED 255
+enum UWBComCodes {
+    POLL,
+    POLL_ACK,
+    RANGE,
+    RANGE_REPORT,
+    UPDATE_LIGHT_STATE,
+    UPDATE_TAG_CONTROL_STATE,
+    RANGE_FAILED
+};
+
 // message flow state
 volatile byte expectedMsgId = POLL_ACK;
 // message sent/received state
@@ -126,13 +136,20 @@ DW1000Time timePollSent;
 DW1000Time timePollAckReceived;
 DW1000Time timeRangeSent;
 // data buffer
-#define LEN_DATA 16
+#define LEN_DATA 20
 byte data[LEN_DATA];
 // watchdog and reset period
 uint32_t lastActivity;
 uint32_t resetPeriod = 250;
 // reply times (same on both sides for symm. ranging)
 uint16_t replyDelayTimeUS = 3000;
+
+///////////////////////////////////////////////////////////////////////////////
+// CONTROL INTERFACE LOGIC
+
+
+///////////////////////////////////////////////////////////////////////////////
+// SSD1306 DISPLAY LOGIC
 
 ///////////////////////////////////////////////////////////////////////////////
 // DWM1000 UWB COMMUNICATION LOGIC
@@ -149,16 +166,19 @@ void resetInactive() {
     noteActivity();
 }
 
+// Handler function for when a communication is successfully sent by DWM1000 module.
 void handleSent() {
     // status change on sent success
     sentAck = true;
 }
 
+// Handler function for when a communication is successfully received by DWM1000 module.
 void handleReceived() {
-    // status change on received success
     receivedAck = true;
 }
 
+// Send polling message out into the air to see if any anchors/bulbs are in range to
+// reply and start a conversation.
 void transmitPoll() {
     DW1000.newTransmit();
     DW1000.setDefaults();
@@ -168,11 +188,12 @@ void transmitPoll() {
 //    Serial.println(F("Transmit Routine Started"));
 }
 
+// Send four things:  Tag ID, timePollSent, timePollAckReceived, timeRangeSent
 void transmitRange() {
     DW1000.newTransmit();
     DW1000.setDefaults();
     data[0] = RANGE;
-    // delay sending the message and remember expected future sent timestamp
+    // delay sending the message for the sake of precision and remember expected future sent timestamp
     DW1000Time deltaTime = DW1000Time(replyDelayTimeUS, DW1000Time::MICROSECONDS);
     timeRangeSent = DW1000.setDelay(deltaTime);
     timePollSent.getTimestamp(data + 1);
@@ -181,6 +202,25 @@ void transmitRange() {
     DW1000.setData(data, LEN_DATA);
     DW1000.startTransmit();
     Serial.print("Expect RANGE to be sent @ "); Serial.println(timeRangeSent.getAsFloat());
+}
+
+void transmitLightState() {
+    DW1000.newTransmit();
+    DW1000.setDefaults();
+    data[0] = UPDATE_LIGHT_STATE;
+
+    DW1000.setData(data, LEN_DATA);
+    DW1000.startTransmit();
+}
+
+// Send:  
+void transmitTagControlState() {
+    DW1000.newTransmit();
+    DW1000.setDefaults();
+    data[0] = UPDATE_TAG_CONTROL_STATE;
+
+    DW1000.setData(data, LEN_DATA);
+    DW1000.startTransmit();
 }
 
 void receiver() {
@@ -260,6 +300,12 @@ void loop() {
             DW1000.getTransmitTimestamp(timeRangeSent);
             noteActivity();
         }
+        else if (msgId == UPDATE_LIGHT_STATE) {
+            sendLightStateMsg();
+        }
+        else if (msgId == UPDATE_TAG_CONTROL_STATE) {
+            sendTagControlStateMsg();
+        }
     }
     if (receivedAck) {
         receivedAck = false;
@@ -267,7 +313,7 @@ void loop() {
         DW1000.getData(data, LEN_DATA);
         byte msgId = data[0];
         if (msgId != expectedMsgId) {
-            // unexpected message, start over again
+            // unexpected message, start over again beginning with poll
             Serial.print("Received wrong message # "); Serial.println(msgId);
             expectedMsgId = POLL_ACK;
             transmitPoll();

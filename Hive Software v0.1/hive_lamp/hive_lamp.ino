@@ -28,6 +28,9 @@
  *  - move strings to flash (less RAM consumption)
  */
 
+///////////////////////////////////////////////////////////////////////////////
+// LIBRARIES
+
 #include <SPI.h>
 #include <FastLED.h>
 #include <DW1000.h>
@@ -47,31 +50,39 @@ const uint8_t PIN_SS = 10; // spi select pin
 #define NUM_LEDS 1
 #define CHIPSET WS2812B
 #define COLOR_ORDER GRB
-CRGB leds[NUM_LEDS];
 
 struct bulbProps {
+    int bulbID;
     int fixtureBrightness;
     int[256] brightnessCurve;
 };
 
-struct TagVars {
-    int rangeOfActivation;
+struct lightConfig {
+    byte tagID;
+    byte rangeOfActivation;
     byte brightness;
     byte redChannel;
     byte greenChannel;
     byte blueChannel;
-    int turnOnDelay;
-    int shutOffDelay;
-    int fadeInRate;
-    int fadeOutRate;
     byte fadeOnRangeOnly;
     byte cutOffMaxBrightness;
     byte cutOffMinBrightness;
+    short turnOnDelay;
+    short shutOffDelay;
+    short fadeInRate;
+    short fadeOutRate;
 };
 
-struct TagControl {
+struct tagControl {
+    byte tagID;
     byte authLevel;
+    byte lightMode;
     byte collisionMode;
+};
+
+struct rangePacket {
+    byte tagID;
+    
 };
 
 enum tagAuthLevels {
@@ -113,14 +124,24 @@ byte LEDBrightnessTable[256] = {
     184, 186, 189, 191, 193, 195, 197, 199, 201, 204, 206, 208, 210, 212, 215, 217,
     219, 221, 224, 226, 228, 231, 233, 235, 238, 240, 243, 245, 248, 250, 253, 255};
 
+CRGB leds[NUM_LEDS];
+struct tagVars lightSettings = {5, 100, 256, 256, 256, 1, 0, 100, 0, 0, 0, 0};
+struct tagControl[5] tagsInRange;
+float distance;
+
 ///////////////////////////////////////////////////////////////////////////////
 // DWM1000 UWB MODULE VARIABLES
 
-#define POLL 0
-#define POLL_ACK 1
-#define RANGE 2
-#define RANGE_REPORT 3
-#define RANGE_FAILED 255
+enum UWBComCodes {
+    POLL,
+    POLL_ACK,
+    RANGE,
+    RANGE_REPORT,
+    UPDATE_LIGHT_STATE,
+    UPDATE_TAG_CONTROL_STATE,
+    RANGE_FAILED
+};
+
 // message flow state
 volatile byte expectedMsgId = POLL;
 // message sent/received state
@@ -138,7 +159,7 @@ DW1000Time timeRangeReceived;
 // last computed range/time
 DW1000Time timeComputedRange;
 // data buffer
-#define LEN_DATA 16
+#define LEN_DATA 20
 byte data[LEN_DATA];
 // watchdog and reset period (in milliseconds)
 uint32_t lastActivity;
@@ -214,42 +235,8 @@ void receiver() {
 //    Serial.println(F("Receiver Routine Started"));
 }
 
-void initializeUWBModule() {
-    // initialize ultra-wideband hardware (DWM1000)
-    Serial.println(F("### DW1000-arduino-ranging-anchor ###"));
-    // initialize the driver
-    DW1000.begin(PIN_IRQ, PIN_RST);
-    DW1000.select(PIN_SS);
-    Serial.println(F("DW1000 initialized ..."));
-    // general configuration
-    DW1000.newConfiguration();
-    DW1000.setDefaults();
-    DW1000.setDeviceAddress(1);
-    DW1000.setNetworkId(10);
-    DW1000.enableMode(DW1000.MODE_LONGDATA_RANGE_LOWPOWER);
-    DW1000.commitConfiguration();
-    Serial.println(F("Committed configuration ..."));
-    // DEBUG chip info and registers pretty printed
-    char msg[128];
-    DW1000.getPrintableDeviceIdentifier(msg);
-    Serial.print("Device ID: "); Serial.println(msg);
-    DW1000.getPrintableExtendedUniqueIdentifier(msg);
-    Serial.print("Unique ID: "); Serial.println(msg);
-    DW1000.getPrintableNetworkIdAndShortAddress(msg);
-    Serial.print("Network ID & Device Address: "); Serial.println(msg);
-    DW1000.getPrintableDeviceMode(msg);
-    Serial.print("Device mode: "); Serial.println(msg);
-    // attach callback for (successfully) sent and received messages
-    DW1000.attachSentHandler(handleSent);
-    DW1000.attachReceivedHandler(handleReceived);
-    // anchor starts in receiving mode, awaiting a ranging poll message
-    receiver();
-    noteActivity();
-    // for first time ranging frequency computation
-    rangingCountPeriod = millis();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
+// DWM1000 UWB COMPUTATIONS
 
 /*
  * RANGING ALGORITHMS
@@ -288,6 +275,7 @@ void computeRangeSymmetric() {
  */
 
 ///////////////////////////////////////////////////////////////////////////////
+// LED STATE CHANGE
 
 // What kind of behavioral mode do we want the lights to be in?
 // VARIABLES:
@@ -310,10 +298,6 @@ void computeRangeSymmetric() {
 // 4 - Constant brightness outside of range threshold
 // 5 - X closest lights
 // 6 - X farthest lights
-
-void initializeLEDMode() {
-    FastLED.addLeds<CHIPSET, PIN_LED, COLOR_ORDER>(leds, NUM_LEDS);
-}
 
 void toggleLEDMode(int ledModes, int setTo) {
 //    switch(ledMode) {
@@ -342,14 +326,108 @@ void initializeSerialOutput() {
     delay(8000);
 }
 
+void initializeLEDModule() {
+    FastLED.addLeds<CHIPSET, PIN_LED, COLOR_ORDER>(leds, NUM_LEDS);
+}
+
+void initializeUWBModule() {
+    // initialize ultra-wideband hardware (DWM1000)
+    Serial.println(F("### DW1000-arduino-ranging-anchor ###"));
+    // initialize the driver
+    DW1000.begin(PIN_IRQ, PIN_RST);
+    DW1000.select(PIN_SS);
+    Serial.println(F("DW1000 initialized ..."));
+    // general configuration
+    DW1000.newConfiguration();
+    DW1000.setDefaults();
+    DW1000.setDeviceAddress(1);
+    DW1000.setNetworkId(10);
+    DW1000.enableMode(DW1000.MODE_LONGDATA_RANGE_LOWPOWER);
+    DW1000.commitConfiguration();
+    Serial.println(F("Committed configuration ..."));
+    // DEBUG chip info and registers pretty printed
+    char msg[128];
+    DW1000.getPrintableDeviceIdentifier(msg);
+    Serial.print("Device ID: "); Serial.println(msg);
+    DW1000.getPrintableExtendedUniqueIdentifier(msg);
+    Serial.print("Unique ID: "); Serial.println(msg);
+    DW1000.getPrintableNetworkIdAndShortAddress(msg);
+    Serial.print("Network ID & Device Address: "); Serial.println(msg);
+    DW1000.getPrintableDeviceMode(msg);
+    Serial.print("Device mode: "); Serial.println(msg);
+    // attach callback for (successfully) sent and received messages
+    DW1000.attachSentHandler(handleSent);
+    DW1000.attachReceivedHandler(handleReceived);
+    // anchor starts in receiving mode, awaiting a ranging poll message
+    receiver();
+    noteActivity();
+    // for first time ranging frequency computation
+    rangingCountPeriod = millis();
+}
+
 void setup() {
     initializeSerialOutput();
-    initializeLEDMode();
+    initializeLEDModule();
     initializeUWBModule();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // LOOPING EXECUTION ROUTINE
+
+
+void uponPollMsg() {
+    // on POLL we (re-)start, so no protocol failure
+    protocolFailed = false;
+    DW1000.getReceiveTimestamp(timePollReceived);
+    expectedMsgId = RANGE;
+    transmitPollAck();
+    noteActivity();    
+}
+
+// Upon receiving timing info required for range calculation, execute range
+// calculation and update range calculation.  Get 
+void uponRangeMsg() {
+    DW1000.getReceiveTimestamp(timeRangeReceived);
+    expectedMsgId = POLL;
+    if (!protocolFailed) {
+        timePollSent.setTimestamp(data + 1);
+        timePollAckReceived.setTimestamp(data + 6);
+        timeRangeSent.setTimestamp(data + 11);
+        // (re-)compute range as two-way ranging is done
+        computeRangeAsymmetric(); // CHOSEN RANGING ALGORITHM
+        transmitRangeReport(timeComputedRange.getAsMicroSeconds());
+        distance = timeComputedRange.getAsMeters();
+        Serial.print("Range: "); Serial.print(distance); Serial.print(" m");
+        leds[0] = CHSV(distance * 100, distance * 100, distance * 100); FastLED.show(); delay(30);
+//                leds[0] = CRGB::Black; FastLED.show(); delay(30);
+        Serial.print("\t RX power: "); Serial.print(DW1000.getReceivePower()); Serial.print(" dBm");
+        Serial.print("\t Sampling: "); Serial.print(samplingRate); Serial.println(" Hz");
+        //Serial.print("FP power is [dBm]: "); Serial.print(DW1000.getFirstPathPower());
+        //Serial.print("RX power is [dBm]: "); Serial.println(DW1000.getReceivePower());
+        //Serial.print("Receive quality: "); Serial.println(DW1000.getReceiveQuality());
+        // update sampling rate (each second)
+        successRangingCount++;
+        if (curMillis - rangingCountPeriod > 1000) {
+            samplingRate = (1000.0f * successRangingCount) / (curMillis - rangingCountPeriod);
+            rangingCountPeriod = curMillis;
+            successRangingCount = 0;
+        }
+    }
+    else {
+        transmitRangeFailed();
+    }
+
+    noteActivity();
+}
+
+void uponLightStateMsg() {
+    
+}
+
+void uponTagControlStateMsg() {
+    
+}
+
 
 void loop() {
     int32_t curMillis = millis();
@@ -387,50 +465,23 @@ void loop() {
         Serial.print(" ");
         Serial.println(data[0]);
         byte msgId = data[0];
+        
         if (msgId != expectedMsgId) { //
             // unexpected message, start over again (except if already POLL)
             protocolFailed = true;
         }
+        
         if (msgId == POLL) {
-            // on POLL we (re-)start, so no protocol failure
-            protocolFailed = false;
-            DW1000.getReceiveTimestamp(timePollReceived);
-            expectedMsgId = RANGE;
-            transmitPollAck();
-            noteActivity();
+            uponPollMsg();
         }
         else if (msgId == RANGE) {
-            DW1000.getReceiveTimestamp(timeRangeReceived);
-            expectedMsgId = POLL;
-            if (!protocolFailed) {
-                timePollSent.setTimestamp(data + 1);
-                timePollAckReceived.setTimestamp(data + 6);
-                timeRangeSent.setTimestamp(data + 11);
-                // (re-)compute range as two-way ranging is done
-                computeRangeAsymmetric(); // CHOSEN RANGING ALGORITHM
-                transmitRangeReport(timeComputedRange.getAsMicroSeconds());
-                float distance = timeComputedRange.getAsMeters();
-                Serial.print("Range: "); Serial.print(distance); Serial.print(" m");
-                leds[0] = CHSV(distance * 100, distance * 100, distance * 100); FastLED.show(); delay(30);
-//                leds[0] = CRGB::Black; FastLED.show(); delay(30);
-                Serial.print("\t RX power: "); Serial.print(DW1000.getReceivePower()); Serial.print(" dBm");
-                Serial.print("\t Sampling: "); Serial.print(samplingRate); Serial.println(" Hz");
-                //Serial.print("FP power is [dBm]: "); Serial.print(DW1000.getFirstPathPower());
-                //Serial.print("RX power is [dBm]: "); Serial.println(DW1000.getReceivePower());
-                //Serial.print("Receive quality: "); Serial.println(DW1000.getReceiveQuality());
-                // update sampling rate (each second)
-                successRangingCount++;
-                if (curMillis - rangingCountPeriod > 1000) {
-                    samplingRate = (1000.0f * successRangingCount) / (curMillis - rangingCountPeriod);
-                    rangingCountPeriod = curMillis;
-                    successRangingCount = 0;
-                }
-            }
-            else {
-                transmitRangeFailed();
-            }
-
-            noteActivity();
+            uponRangeMsg();
+        }
+        else if (msgId == UPDATE_LIGHT_STATE) {
+            uponLightStateMsg();
+        }
+        else if (msgId == UPDATE_TAG_CONTROL_STATE) {
+            uponTagControlStateMsg();
         }
     }
 }
