@@ -1,0 +1,7 @@
+(fp_lib_table
+  (lib (name USB3140-30-0140-1-C)(type KiCad)(uri "C:/Users/Mitchell/Documents/GitHub/Hive-Wave/HW Component Libraries/USB3140-30-0140-1-C_REVE3")(options "")(descr ""))
+  (lib (name RP2040)(type KiCad)(uri "C:/Users/Mitchell/Documents/GitHub/Hive-Wave/HW Component Libraries/RP2040")(options "")(descr ""))
+  (lib (name W25Q40CLSNIG)(type KiCad)(uri "C:/Users/Mitchell/Documents/GitHub/Hive-Wave/HW Component Libraries/W25Q40CLSNIG")(options "")(descr ""))
+  (lib (name LS05-13B05R3)(type KiCad)(uri "C:/Users/Mitchell/Documents/GitHub/Hive-Wave/HW Component Libraries/LS05-13B05R3")(options "")(descr ""))
+  (lib (name SMW312RJT)(type KiCad)(uri "C:/Users/Mitchell/Documents/GitHub/Hive-Wave/HW Component Libraries/SMW312RJT/KiCad")(options "")(descr ""))
+)

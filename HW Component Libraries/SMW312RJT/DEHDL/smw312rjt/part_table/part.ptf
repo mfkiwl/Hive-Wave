@@ -1,0 +1,11 @@
+FILE_TYPE = MULTI_PHYS_TABLE;
+
+PART 'SMW312RJT'
+CLASS = DISCRETE
+{========================================================================================}
+:"MANUFACTURER_NAME", "MANUFACTURER_PART_NUMBER"= "PART_NUMBER", "JEDEC_TYPE", "PACK_TYPE", "MOUSER_PART_NUMBER", "MOUSER_PRICE/STOCK", "ARROW_PART_NUMBER", "ARROW_PRICE/STOCK", "DESCRIPTION", "DATASHEET", "HEIGHT";
+{========================================================================================}
+ "TE Connectivity", "SMW312RJT" (!) = "", "RESM12055X530N", "Resistor Moulded", "571-SMW312RJT", "https://www.mouser.co.uk/ProductDetail/TE-Connectivity-CGS/SMW312RJT?qs=ip69W3eHERWtZgkDyuvpYA%3D%3D", "SMW312RJT", "https://www.arrow.com/en/products/smw312rjt/te-connectivity?region=nac", "TE Connectivity SMW Series Wire Wound High Power Surface Mount Resistor 12 +/-5% 3W +/-200ppm/C", "https://datasheet.datasheetarchive.com/originals/distributors/DKDS42/DSANUWW0051571.pdf", "5.3 mm"
+END_PART
+
+END.

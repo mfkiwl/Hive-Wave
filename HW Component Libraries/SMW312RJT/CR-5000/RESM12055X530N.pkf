@@ -1,0 +1,10 @@
+(unit MM)
+
+(package "RESM12055X530N"
+    (type UNDEF)
+    (uver 2)
+    (mountForm default
+        (footprintRef "RESM12055X530N")
+        (spec "default")
+    )
+)

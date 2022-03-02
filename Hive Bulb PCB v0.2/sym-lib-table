@@ -3,4 +3,7 @@
   (lib (name Arduino_Nano_33_IoT)(type Legacy)(uri "C:/Users/Mitchell/Documents/GitHub/Hive-Wave/Hive Bulb PCB v0.2/ABX00027/ABX00027.lib")(options "")(descr ""))
   (lib (name SY8008B)(type Legacy)(uri "C:/Users/Mitchell/Documents/GitHub/Hive-Wave/Hive Bulb PCB v0.2/LIB_SY8008B/SY8008B/KiCad/SY8008B.lib")(options "")(descr ""))
   (lib (name LS05-13B05R3)(type Legacy)(uri "C:/Users/Mitchell/Documents/GitHub/Hive-Wave/HW Component Libraries/LS05-13B05R3/LS05-13B05R3.lib")(options "")(descr ""))
+  (lib (name W25Q40CLSNIG)(type Legacy)(uri "C:/Users/Mitchell/Documents/GitHub/Hive-Wave/HW Component Libraries/W25Q40CLSNIG/W25Q40CLSNIG.lib")(options "")(descr ""))
+  (lib (name USB3140-30-0140-1-C)(type Legacy)(uri "C:/Users/Mitchell/Documents/GitHub/Hive-Wave/HW Component Libraries/USB3140-30-0140-1-C_REVE3/USB3140-30-0140-1-C_REVE3.lib")(options "")(descr ""))
+  (lib (name SMW312RJT)(type Legacy)(uri "C:/Users/Mitchell/Documents/GitHub/Hive-Wave/HW Component Libraries/SMW312RJT/KiCad/SMW312RJT.lib")(options "")(descr ""))
 )

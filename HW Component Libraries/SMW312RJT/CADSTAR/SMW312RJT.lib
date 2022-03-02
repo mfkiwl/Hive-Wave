@@ -1,0 +1,18 @@
+.SMW312RJT :1 ;TE Connectivity SMW Series Wire Wound High Power Surface Mount Resistor 12 +/-5% 3W +/-200ppm/C
+RESM12055X530N
+*STM R
+*NGS
+*PLB 1="1" 2="2"
+*MXP 2
+*DFN SMW312RJT
+~!Manufacturer_Name (TE Connectivity)
+~!Manufacturer_Part_Number (SMW312RJT)
+~!Mouser Part Number (571-SMW312RJT)
+~!Link Mouser Price/Stock (https://www.mouser.co.uk/ProductDetail/TE-Connectivity-CGS/SMW312RJT?qs=ip69W3eHERWtZgkDyuvpYA%3D%3D)
+~!Arrow Part Number (SMW312RJT)
+~!Link Arrow Price/Stock (https://www.arrow.com/en/products/smw312rjt/te-connectivity?region=nac)
+~!Link Datasheet (https://datasheet.datasheetarchive.com/originals/distributors/DKDS42/DSANUWW0051571.pdf)
+~!Height (5.3mm)
+~!3D_Model (SMW312RJT)
+SMW312RJT
+1.1!U 2.1!U 
