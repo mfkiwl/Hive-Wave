@@ -26,9 +26,9 @@
 #include <DW1000.h>
 
 // connection pins
-const uint8_t PIN_RST = 5; // reset pin
-const uint8_t PIN_IRQ = 4; // irq pin
-const uint8_t PIN_SS = 7; // spi select pin
+const uint8_t PIN_RST = 8; // reset pin
+const uint8_t PIN_IRQ = 9; // irq pin
+const uint8_t PIN_SS = 10; // spi select pin
 
 // DEBUG packet sent status and count
 boolean sent = false;
@@ -40,7 +40,7 @@ DW1000Time sentTime;
 void setup() {
   // DEBUG monitoring
   Serial.begin(9600);
-  delay(8000);
+  delay(15000);
   Serial.println(F("### DW1000-arduino-sender-test ###"));
   // initialize the driver
   DW1000.begin(PIN_IRQ, PIN_RST);

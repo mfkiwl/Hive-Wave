@@ -37,10 +37,17 @@
 ///////////////////////////////////////////////////////////////////////////////
 // I/O PINS
 
-#define PIN_LED 7; // WS2812B LED data pin
+//#define PIN_LED 7 // WS2812B LED data pin
+#define PIN_LED 2 // PCB v0.1
 
-const uint8_t PIN_RST = 8; // reset pin
-const uint8_t PIN_IRQ = 9; // irq pin
+
+//const uint8_t PIN_RST = 8; // reset pin
+//const uint8_t PIN_IRQ = 9; // irq pin
+//const uint8_t PIN_SS = 10; // spi select pin
+
+// for PCB v0.1
+const uint8_t PIN_RST = 9; // reset pin
+const uint8_t PIN_IRQ = 8; // irq pin
 const uint8_t PIN_SS = 10; // spi select pin
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -111,7 +118,7 @@ byte LEDBrightnessTable[256] = {
     219, 221, 224, 226, 228, 231, 233, 235, 238, 240, 243, 245, 248, 250, 253, 255};
 
 struct TagVars lightSettings = {5, 100, 256, 256, 256, 1, 0, 100, 0, 0, 0, 0};
-struct TagControl tagCommands = {0, ENV_MASTER, BRIGHTER_WHEN_CLOSER, PREEMINENCE};
+struct TagControl tagCommands = {ENV_MASTER, PREEMINENCE};
 
 ///////////////////////////////////////////////////////////////////////////////
 // DWM1000 UWB MODULE VARIABLES
@@ -236,8 +243,8 @@ void receiver() {
 // SETUP EXECUTION ROUTINE
 
 void initializeSerialOutput() {
-    Serial.begin(115200);
-    delay(8000);
+    Serial.begin(9600);
+    delay(14000);
 }
 
 void initializeUWBModule() {
@@ -249,7 +256,7 @@ void initializeUWBModule() {
     // general configuration
     DW1000.newConfiguration();
     DW1000.setDefaults();
-    DW1000.setDeviceAddress(2);
+    DW1000.setDeviceAddress(4);
     DW1000.setNetworkId(10);
     DW1000.enableMode(DW1000.MODE_LONGDATA_RANGE_LOWPOWER);
     DW1000.commitConfiguration();
@@ -282,6 +289,7 @@ void setup() {
 // LOOPING EXECUTION ROUTINE
 
 void loop() {
+//    Serial.println("E");
     if (!sentAck && !receivedAck) {
         // check if inactive
         if (millis() - lastActivity > resetPeriod) {
@@ -289,6 +297,13 @@ void loop() {
         }
         return;
     }
+
+    Serial.print("\tSent Ack: ");
+    Serial.print(sentAck);
+    Serial.print("\tReceived Ack: ");
+    Serial.print(receivedAck);
+    Serial.println();
+    
     // continue on any success confirmation
     if (sentAck) {
         sentAck = false;
@@ -301,10 +316,10 @@ void loop() {
             noteActivity();
         }
         else if (msgId == UPDATE_LIGHT_STATE) {
-            sendLightStateMsg();
+            transmitLightState();
         }
         else if (msgId == UPDATE_TAG_CONTROL_STATE) {
-            sendTagControlStateMsg();
+            transmitTagControlState();
         }
     }
     if (receivedAck) {

@@ -32,29 +32,37 @@
 // LIBRARIES
 
 #include <SPI.h>
-#include <FastLED.h>
+//#include <FastLED.h>
+#include <Adafruit_NeoPixel.h>
 #include <DW1000.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 // I/O PINS
 
-#define PIN_LED 7 // WS2812B LED data pin
+//#define PIN_LED 7 // WS2812B LED data pin
+#define PIN_LED 2 // PCB v0.1
 
-const uint8_t PIN_RST = 8; // reset pin
-const uint8_t PIN_IRQ = 9; // irq pin
+
+//const uint8_t PIN_RST = 8; // reset pin
+//const uint8_t PIN_IRQ = 9; // irq pin
+//const uint8_t PIN_SS = 10; // spi select pin
+
+// for PCB v0.1
+const uint8_t PIN_RST = 9; // reset pin
+const uint8_t PIN_IRQ = 8; // irq pin
 const uint8_t PIN_SS = 10; // spi select pin
 
 ///////////////////////////////////////////////////////////////////////////////
 // LAMP AND TAG CONSTRUCT VALUES
 
-#define NUM_LEDS 1
+#define NUM_LEDS 16
 #define CHIPSET WS2812B
 #define COLOR_ORDER GRB
 
 struct bulbProps {
     int bulbID;
     int fixtureBrightness;
-    int[256] brightnessCurve;
+    int brightnessCurve[256];
 };
 
 struct lightConfig {
@@ -124,9 +132,10 @@ byte LEDBrightnessTable[256] = {
     184, 186, 189, 191, 193, 195, 197, 199, 201, 204, 206, 208, 210, 212, 215, 217,
     219, 221, 224, 226, 228, 231, 233, 235, 238, 240, 243, 245, 248, 250, 253, 255};
 
-CRGB leds[NUM_LEDS];
-struct tagVars lightSettings = {5, 100, 256, 256, 256, 1, 0, 100, 0, 0, 0, 0};
-struct tagControl[5] tagsInRange;
+Adafruit_NeoPixel pixels(NUM_LEDS, PIN_LED, NEO_GRB + NEO_KHZ800);
+//CRGB leds[NUM_LEDS];
+struct lightConfig lightSettings = {5, 100, 256, 256, 256, 1, 0, 100, 0, 0, 0, 0};
+struct tagControl tagsInRange[5];
 float distance;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -322,12 +331,39 @@ int calculateLEDChange() {
 // SETUP EXECUTION ROUTINE
 
 void initializeSerialOutput() {
-    Serial.begin(115200);
-    delay(8000);
+    Serial.begin(9600);
+    delay(14000);
+    Serial.println(F("### def DW1000-arduino-ranging-anchor ###"));
 }
 
 void initializeLEDModule() {
-    FastLED.addLeds<CHIPSET, PIN_LED, COLOR_ORDER>(leds, NUM_LEDS);
+//    FastLED.addLeds<CHIPSET, PIN_LED, COLOR_ORDER>(leds, NUM_LEDS);
+    pixels.begin();
+    pixels.clear();
+    pixels.setPixelColor(0, pixels.Color(0, 15, 15));
+    pixels.show();
+    pixels.setPixelColor(1, pixels.Color(0, 15, 15));
+    pixels.show();
+    pixels.setPixelColor(2, pixels.Color(0, 15, 15));
+    pixels.show();
+    pixels.setPixelColor(3, pixels.Color(0, 15, 15));
+    pixels.show();
+    pixels.setPixelColor(4, pixels.Color(0, 15, 15));
+    pixels.show();
+    pixels.setPixelColor(5, pixels.Color(0, 15, 15));
+    pixels.show();
+    pixels.setPixelColor(6, pixels.Color(0, 15, 15));
+    pixels.show();
+    pixels.setPixelColor(7, pixels.Color(0, 15, 15));
+    pixels.show();
+    pixels.setPixelColor(8, pixels.Color(0, 15, 15));
+    pixels.show();
+    pixels.setPixelColor(9, pixels.Color(0, 15, 15));
+    pixels.show();
+    pixels.setPixelColor(10, pixels.Color(0, 15, 15));
+    pixels.show();
+    pixels.setPixelColor(11, pixels.Color(0, 15, 15));
+    pixels.show();
 }
 
 void initializeUWBModule() {
@@ -340,7 +376,7 @@ void initializeUWBModule() {
     // general configuration
     DW1000.newConfiguration();
     DW1000.setDefaults();
-    DW1000.setDeviceAddress(1);
+    DW1000.setDeviceAddress(3);
     DW1000.setNetworkId(10);
     DW1000.enableMode(DW1000.MODE_LONGDATA_RANGE_LOWPOWER);
     DW1000.commitConfiguration();
@@ -377,6 +413,7 @@ void setup() {
 
 void uponPollMsg() {
     // on POLL we (re-)start, so no protocol failure
+//    Serial.println("POLL");
     protocolFailed = false;
     DW1000.getReceiveTimestamp(timePollReceived);
     expectedMsgId = RANGE;
@@ -386,7 +423,7 @@ void uponPollMsg() {
 
 // Upon receiving timing info required for range calculation, execute range
 // calculation and update range calculation.  Get 
-void uponRangeMsg() {
+void uponRangeMsg(int32_t curMillis) {
     DW1000.getReceiveTimestamp(timeRangeReceived);
     expectedMsgId = POLL;
     if (!protocolFailed) {
@@ -398,7 +435,11 @@ void uponRangeMsg() {
         transmitRangeReport(timeComputedRange.getAsMicroSeconds());
         distance = timeComputedRange.getAsMeters();
         Serial.print("Range: "); Serial.print(distance); Serial.print(" m");
-        leds[0] = CHSV(distance * 100, distance * 100, distance * 100); FastLED.show(); delay(30);
+//        leds[0] = CHSV(distance * 100, distance * 100, distance * 100); FastLED.show(); delay(30);
+        pixels.setPixelColor(0, pixels.Color(distance * 100, distance * 100, distance * 100));
+//        pixels.clear();
+//        pixels.setPixelColor(0, pixels.Color(0, 150, 150));
+        pixels.show();
 //                leds[0] = CRGB::Black; FastLED.show(); delay(30);
         Serial.print("\t RX power: "); Serial.print(DW1000.getReceivePower()); Serial.print(" dBm");
         Serial.print("\t Sampling: "); Serial.print(samplingRate); Serial.println(" Hz");
@@ -421,16 +462,19 @@ void uponRangeMsg() {
 }
 
 void uponLightStateMsg() {
-    
+    return;
 }
 
 void uponTagControlStateMsg() {
-    
+    return;
 }
 
+int counter = 0;
 
 void loop() {
     int32_t curMillis = millis();
+//    Serial.print("Cycle Start Time: ");
+//    Serial.println(curMillis);
 
     // Appears to be for if there is no activity and the hardware times out,
     // then reset it so it (receiver mechanism) will listen for polling requests again.
@@ -441,14 +485,20 @@ void loop() {
         }
         return;
     }
-//    Serial.print(sentAck);
-//    Serial.print(" ");
-//    Serial.print(receivedAck);
-//    Serial.println();
-    
-    // If message sent successfully, then get DW1000 precision timestamp
-    // for when it was sent.
+    Serial.print("Counter: ");
+    Serial.print(counter);
+    Serial.print("\tSent Ack: ");
+    Serial.print(sentAck);
+    Serial.print("\tReceived Ack: ");
+    Serial.print(receivedAck);
+    Serial.println();
+//    
+//    // If message sent successfully, then get DW1000 precision timestamp
+//    // for when it was sent.
+//    Serial.println("E");
     if (sentAck) {
+        counter++;
+//        Serial.println("SENT");
         sentAck = false;
         byte msgId = data[0];
         if (msgId == POLL_ACK) {
@@ -456,26 +506,32 @@ void loop() {
             noteActivity();
         }
     }
-
-    // Upon receipt of message, 
+//
+//    // Upon receipt of message, 
     if (receivedAck) {
+        counter++;
         receivedAck = false;
         // get incoming message and parse
         DW1000.getData(data, LEN_DATA);
-        Serial.print(" ");
-        Serial.println(data[0]);
+//        Serial.print(" ");
+//        Serial.println(data[0]);
         byte msgId = data[0];
         
         if (msgId != expectedMsgId) { //
             // unexpected message, start over again (except if already POLL)
+            Serial.println("PROTOCOL FAILED");
             protocolFailed = true;
         }
         
         if (msgId == POLL) {
+            Serial.println("POLL RESPONSE START");
             uponPollMsg();
+            Serial.println("POLL RESPONSE FINISHED");
         }
         else if (msgId == RANGE) {
-            uponRangeMsg();
+            Serial.println("RANGE RESPONSE START");
+            uponRangeMsg(curMillis);
+            Serial.println("RANGE RESPONSE FINISHED");
         }
         else if (msgId == UPDATE_LIGHT_STATE) {
             uponLightStateMsg();

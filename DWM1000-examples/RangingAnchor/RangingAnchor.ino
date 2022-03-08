@@ -32,9 +32,9 @@
 #include <DW1000.h>
 
 // connection pins
-const uint8_t PIN_RST = 5; // reset pin
-const uint8_t PIN_IRQ = 4; // irq pin
-const uint8_t PIN_SS = 7; // spi select pin
+const uint8_t PIN_RST = 9; // reset pin
+const uint8_t PIN_IRQ = 8; // irq pin
+const uint8_t PIN_SS = 10; // spi select pin
 
 // messages used in the ranging protocol
 // TODO replace by enum
