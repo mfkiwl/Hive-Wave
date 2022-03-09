@@ -6,4 +6,5 @@
   (lib (name W25Q40CLSNIG)(type Legacy)(uri "C:/Users/Mitchell/Documents/GitHub/Hive-Wave/HW Component Libraries/W25Q40CLSNIG/W25Q40CLSNIG.lib")(options "")(descr ""))
   (lib (name USB3140-30-0140-1-C)(type Legacy)(uri "C:/Users/Mitchell/Documents/GitHub/Hive-Wave/HW Component Libraries/USB3140-30-0140-1-C_REVE3/USB3140-30-0140-1-C_REVE3.lib")(options "")(descr ""))
   (lib (name SMW312RJT)(type Legacy)(uri "C:/Users/Mitchell/Documents/GitHub/Hive-Wave/HW Component Libraries/SMW312RJT/KiCad/SMW312RJT.lib")(options "")(descr ""))
+  (lib (name DMG2305UX-7)(type Legacy)(uri "C:/Users/Mitchell/Documents/GitHub/Hive-Wave/HW Component Libraries/DMG2305UX-7/DMG2305UX-7.lib")(options "")(descr ""))
 )
