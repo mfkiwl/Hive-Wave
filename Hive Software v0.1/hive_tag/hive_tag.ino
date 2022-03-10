@@ -243,8 +243,10 @@ void receiver() {
 // SETUP EXECUTION ROUTINE
 
 void initializeSerialOutput() {
-    Serial.begin(9600);
-    delay(14000);
+    Serial.begin(115200);
+    delay(8000);
+    Serial.println(F("RUN ### DW1000-arduino-ranging-tag ###"));
+//    delay(14000);
 }
 
 void initializeUWBModule() {
@@ -282,7 +284,7 @@ void initializeUWBModule() {
 
 void setup() {
     initializeSerialOutput();
-    initializeUWBModule();
+//    initializeUWBModule();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -290,65 +292,65 @@ void setup() {
 
 void loop() {
 //    Serial.println("E");
-    if (!sentAck && !receivedAck) {
-        // check if inactive
-        if (millis() - lastActivity > resetPeriod) {
-            resetInactive();
-        }
-        return;
-    }
-
-    Serial.print("\tSent Ack: ");
-    Serial.print(sentAck);
-    Serial.print("\tReceived Ack: ");
-    Serial.print(receivedAck);
-    Serial.println();
-    
-    // continue on any success confirmation
-    if (sentAck) {
-        sentAck = false;
-        byte msgId = data[0];
-        if (msgId == POLL) {
-            DW1000.getTransmitTimestamp(timePollSent);
-            Serial.print("Sent POLL @ "); Serial.println(timePollSent.getAsFloat());
-        } else if (msgId == RANGE) {
-            DW1000.getTransmitTimestamp(timeRangeSent);
-            noteActivity();
-        }
-        else if (msgId == UPDATE_LIGHT_STATE) {
-            transmitLightState();
-        }
-        else if (msgId == UPDATE_TAG_CONTROL_STATE) {
-            transmitTagControlState();
-        }
-    }
-    if (receivedAck) {
-        receivedAck = false;
-        // get message and parse
-        DW1000.getData(data, LEN_DATA);
-        byte msgId = data[0];
-        if (msgId != expectedMsgId) {
-            // unexpected message, start over again beginning with poll
-            Serial.print("Received wrong message # "); Serial.println(msgId);
-            expectedMsgId = POLL_ACK;
-            transmitPoll();
-            return;
-        }
-        if (msgId == POLL_ACK) {
-            DW1000.getReceiveTimestamp(timePollAckReceived);
-            expectedMsgId = RANGE_REPORT;
-            transmitRange();
-            noteActivity();
-        } else if (msgId == RANGE_REPORT) {
-            expectedMsgId = POLL_ACK;
-            float curRange;
-            memcpy(&curRange, data + 1, 4);
-            transmitPoll();
-            noteActivity();
-        } else if (msgId == RANGE_FAILED) {
-            expectedMsgId = POLL_ACK;
-            transmitPoll();
-            noteActivity();
-        }
-    }
+//    if (!sentAck && !receivedAck) {
+//        // check if inactive
+//        if (millis() - lastActivity > resetPeriod) {
+//            resetInactive();
+//        }
+//        return;
+//    }
+//
+//    Serial.print("\tSent Ack: ");
+//    Serial.print(sentAck);
+//    Serial.print("\tReceived Ack: ");
+//    Serial.print(receivedAck);
+//    Serial.println();
+//    
+//    // continue on any success confirmation
+//    if (sentAck) {
+//        sentAck = false;
+//        byte msgId = data[0];
+//        if (msgId == POLL) {
+//            DW1000.getTransmitTimestamp(timePollSent);
+//            Serial.print("Sent POLL @ "); Serial.println(timePollSent.getAsFloat());
+//        } else if (msgId == RANGE) {
+//            DW1000.getTransmitTimestamp(timeRangeSent);
+//            noteActivity();
+//        }
+//        else if (msgId == UPDATE_LIGHT_STATE) {
+//            transmitLightState();
+//        }
+//        else if (msgId == UPDATE_TAG_CONTROL_STATE) {
+//            transmitTagControlState();
+//        }
+//    }
+//    if (receivedAck) {
+//        receivedAck = false;
+//        // get message and parse
+//        DW1000.getData(data, LEN_DATA);
+//        byte msgId = data[0];
+//        if (msgId != expectedMsgId) {
+//            // unexpected message, start over again beginning with poll
+//            Serial.print("Received wrong message # "); Serial.println(msgId);
+//            expectedMsgId = POLL_ACK;
+//            transmitPoll();
+//            return;
+//        }
+//        if (msgId == POLL_ACK) {
+//            DW1000.getReceiveTimestamp(timePollAckReceived);
+//            expectedMsgId = RANGE_REPORT;
+//            transmitRange();
+//            noteActivity();
+//        } else if (msgId == RANGE_REPORT) {
+//            expectedMsgId = POLL_ACK;
+//            float curRange;
+//            memcpy(&curRange, data + 1, 4);
+//            transmitPoll();
+//            noteActivity();
+//        } else if (msgId == RANGE_FAILED) {
+//            expectedMsgId = POLL_ACK;
+//            transmitPoll();
+//            noteActivity();
+//        }
+//    }
 }
